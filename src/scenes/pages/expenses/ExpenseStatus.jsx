@@ -116,29 +116,37 @@ export default function ExpenseStatus() {
       sx={{
         "--gap": { xs: "10px", sm: "20px" },
         "--visible": { xs: 1.1, sm: 2.5, md: 3.2 },
-        marginRight: { xs: "-20px", sm: "0px" },
+
         display: "grid",
-        gridAutoFlow: "column",
         gap: "var(--gap)",
-        gridAutoColumns:
-          "calc((100% - (var(--gap) * (var(--visible) - 1))) / var(--visible))",
-        overflowX: "auto",
-        overflowY: "hidden",
-        pb: "27px",
-        WebkitOverflowScrolling: "touch",
-        cursor: "grab",
+
+        gridAutoFlow: { xs: "row", sm: "column" },
+        gridTemplateColumns: { xs: "1fr", sm: "unset" },
+        gridAutoColumns: {
+          xs: "unset",
+          sm: "calc((100% - (var(--gap) * (var(--visible) - 1))) / var(--visible))",
+        },
+
+        overflowX: { xs: "hidden", sm: "auto" },
+        overflowY: { xs: "visible", sm: "hidden" },
+
+        pb: { xs: 0, sm: "27px" },
+        cursor: { xs: "auto", sm: "grab" },
+        marginRight: { xs: 0, sm: 0 },
+
+        "& > *": { width: { xs: "100%", sm: "auto" } },
+
         scrollbarGutter: "stable",
-        scrollbarWidth: "thin",
-        scrollbarColor: "#6C63FF #E2E0FF",
-        // WebKit (Chrome/Edge/Safari) – radi samo kad OS dozvoli
-        "&::-webkit-scrollbar": { height: 8 },
+        scrollbarWidth: { sm: "thin" },
+        scrollbarColor: { sm: "#6C63FF #E2E0FF" },
+        "&::-webkit-scrollbar": { height: { sm: 8 } },
         "&::-webkit-scrollbar-thumb": {
-          backgroundColor: "#6C63FF",
-          borderRadius: 8,
+          backgroundColor: { sm: "#6C63FF" },
+          borderRadius: { sm: 8 },
         },
         "&::-webkit-scrollbar-track": {
-          backgroundColor: "#E2E0FF",
-          borderRadius: 8,
+          backgroundColor: { sm: "#E2E0FF" },
+          borderRadius: { sm: 8 },
         },
       }}
     >

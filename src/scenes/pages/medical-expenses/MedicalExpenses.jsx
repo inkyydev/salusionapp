@@ -7,19 +7,77 @@ import {
   TextField,
   IconButton,
   Button,
-  Chip,
   Tooltip,
   InputAdornment,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import SearchIcon from "@mui/icons-material/Search";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 import csvIcon from "../../../assets/csv-icon.svg";
 import accessIcon from "../../../assets/access-icon.svg";
 import noAccessIcon from "../../../assets/no-access-icon.svg";
 import searchIcon from "../../../assets/search-icon.svg";
 import copyIcon from "../../../assets/copy-icon.svg";
+
+const MOBILE_FIELDS = [
+  { label: "Entered", get: (r) => r.entered },
+  { label: "Submitted", get: (r) => r.submitted },
+  { label: "Plan", get: (r) => r.plan },
+  { label: "Access", get: (r) => (r.access ? "Yes" : "No") },
+  { label: "Name", get: (r) => `${r.firstName} ${r.lastName}` },
+  { label: "Email", get: (r) => r.email },
+  { label: "Employer", get: (r) => r.employer },
+  { label: "Payroll ID", get: (r) => r.payrollId },
+  { label: "Date of service", get: (r) => r.serviceDate },
+  { label: "Premium", get: (r) => r.premium },
+  { label: "Taxable", get: (r) => r.taxable },
+  { label: "Premium Status", get: (r) => r.premiumStatus },
+  {
+    label: "Status",
+    get: (r) => (r.status === "Approved" ? "Approval" : "Pending"),
+  },
+  { label: "Device", get: (r) => r.device },
+  { label: "Receipt", get: (r) => r.receipt },
+];
+
+const MobileList = styled("div")({
+  gap: 12,
+  flexDirection: "column",
+  marginTop: "20px",
+});
+
+const MobileCard = styled(Box)({
+  background: "#fff",
+  borderRadius: 12,
+  padding: "12px 14px",
+  boxShadow: "none",
+});
+
+const Line = styled("div")({
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "baseline",
+  gap: 12,
+  padding: "6px 0",
+  borderTop: "1px solid rgba(70,85,120,0.12)",
+  ":first-of-type": { borderTop: "none", paddingTop: 0 },
+});
+
+const Label = styled(Typography)({
+  color: "#465578",
+  fontSize: 12,
+  flex: "0 0 35%",
+  fontWeight: "600",
+});
+
+const Value = styled(Typography)({
+  color: "#465578",
+  fontSize: 12,
+  textAlign: "right",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
+});
 
 const Card = styled(Box)({
   background: "#F8F9FF",
@@ -395,7 +453,7 @@ const seed = [
     receipt: "IMG_1122.jpg",
   },
 ];
-const demoRows = Array.from({ length: 14 }).map((_, i) => {
+const demoRows = Array.from({ length: 5 }).map((_, i) => {
   const b = seed[i % seed.length];
   return {
     ...b,
@@ -553,7 +611,7 @@ export default function MedicalExpenses() {
               content: '""',
               position: "absolute",
               top: 0,
-              right: 10,
+              right: 0,
               width: 12,
               height: "100%",
               background: "#F8F9FF",
@@ -565,126 +623,207 @@ export default function MedicalExpenses() {
             },
           }}
         >
-          <TableWrap>
-            <Table>
-              <colgroup>
-                <col style={{ width: 100 }} /> {/* Entered */}
-                <col style={{ width: 75 }} /> {/* Submitted */}
-                <col style={{ width: 75 }} /> {/* Plan */}
-                <col style={{ width: 74 }} /> {/* Access */}
-                <col style={{ width: 140 }} /> {/* Name+Email */}
-                <col style={{ width: 300 }} /> {/* Employer */}
-                <col style={{ width: 75 }} /> {/* Payroll ID */}
-                <col style={{ width: 120 }} /> {/* Date of service */}
-                <col style={{ width: 75 }} /> {/* Premium */}
-                <col style={{ width: 75 }} /> {/* Taxable */}
-                <col style={{ width: 110 }} /> {/* Premium Status */}
-                <col style={{ width: 100 }} /> {/* Status */}
-                <col style={{ width: 80 }} /> {/* Device */}
-                <col style={{ width: 110 }} /> {/* Receipt */}
-                <col style={{ width: "var(--w-search)" }} /> {/* Search */}
-                <col style={{ width: "var(--w-copy)" }} /> {/* Copy ID */}
-              </colgroup>
+          <Box
+            sx={{
+              display: { xs: "none", sm: "block" },
+            }}
+          >
+            <TableWrap>
+              <Table>
+                <colgroup>
+                  <col style={{ width: 100 }} /> {/* Entered */}
+                  <col style={{ width: 75 }} /> {/* Submitted */}
+                  <col style={{ width: 75 }} /> {/* Plan */}
+                  <col style={{ width: 74 }} /> {/* Access */}
+                  <col style={{ width: 140 }} /> {/* Name+Email */}
+                  <col style={{ width: 300 }} /> {/* Employer */}
+                  <col style={{ width: 75 }} /> {/* Payroll ID */}
+                  <col style={{ width: 120 }} /> {/* Date of service */}
+                  <col style={{ width: 75 }} /> {/* Premium */}
+                  <col style={{ width: 75 }} /> {/* Taxable */}
+                  <col style={{ width: 110 }} /> {/* Premium Status */}
+                  <col style={{ width: 100 }} /> {/* Status */}
+                  <col style={{ width: 80 }} /> {/* Device */}
+                  <col style={{ width: 110 }} /> {/* Receipt */}
+                  <col style={{ width: "var(--w-search)" }} /> {/* Search */}
+                  <col style={{ width: "var(--w-copy)" }} /> {/* Copy ID */}
+                </colgroup>
 
-              <thead>
-                <Tr>
-                  <Th>Entered</Th>
-                  <Th>Submitted</Th>
-                  <Th>Plan</Th>
-                  <Th>Access</Th>
-                  <Th>Name</Th>
-                  <Th>Employer</Th>
-                  <Th>Payroll&nbsp;ID</Th>
-                  <Th>Date of service</Th>
-                  <Th>Premium</Th>
-                  <Th>Taxable</Th>
-                  <Th>Premium&nbsp;Status</Th>
-                  <Th>Status</Th>
-                  <Th>Device</Th>
-                  <Th>Receipt</Th>
-                  <ThStickyRight2>Search</ThStickyRight2>
-                  <ThStickyRight>Copy&nbsp;ID</ThStickyRight>
-                </Tr>
-              </thead>
-
-              <tbody>
-                {filtered.map((r) => (
-                  <Tr key={r.id}>
-                    <Td>{r.entered}</Td>
-                    <Td>{r.submitted}</Td>
-                    <Td>{r.plan}</Td>
-                    <Td>
-                      <Tooltip title={r.access ? "Has access" : "No access"}>
-                        <IconButton
-                          size="small"
-                          onClick={() => toggleAccess(r.id)}
-                        >
-                          {r.access ? (
-                            <Box
-                              sx={{ width: "20px" }}
-                              component="img"
-                              src={accessIcon}
-                            />
-                          ) : (
-                            <Box
-                              sx={{ width: "20px" }}
-                              component="img"
-                              src={noAccessIcon}
-                            />
-                          )}
-                        </IconButton>
-                      </Tooltip>
-                    </Td>
-                    <Td>
-                      <NameCell>
-                        <span className="name">
-                          {r.firstName} {r.lastName}
-                        </span>
-                        <span className="email">{r.email}</span>
-                      </NameCell>
-                    </Td>
-                    <Td>
-                      <Truncate>{r.employer}</Truncate>
-                    </Td>
-                    <Td>{r.payrollId}</Td>
-                    <Td>{r.serviceDate}</Td>
-                    <Td>{r.premium}</Td>
-                    <Td>{r.taxable}</Td>
-                    <Td>{r.premiumStatus}</Td>
-                    <Td>{r.status === "Approved" ? "Approval" : "Pending"}</Td>
-                    <Td>{r.device}</Td>
-                    <Td>
-                      <Truncate>{r.receipt}</Truncate>
-                    </Td>
-
-                    {/* sticky: SEARCH */}
-                    <TdStickyRight2>
-                      <Tooltip title="Search this row">
-                        <Box
-                          onClick={() => searchThisRow(r)}
-                          component="img"
-                          src={searchIcon}
-                          sx={{ cursor: "pointer" }}
-                        />
-                      </Tooltip>
-                    </TdStickyRight2>
-
-                    {/* sticky: COPY ID */}
-                    <TdStickyRight>
-                      <Tooltip title={copied === r.id ? "Copied!" : "Copy ID"}>
-                        <Box
-                          component="img"
-                          src={copyIcon}
-                          onClick={() => copyId(r.id)}
-                          sx={{ cursor: "pointer" }}
-                        />
-                      </Tooltip>
-                    </TdStickyRight>
+                <thead>
+                  <Tr>
+                    <Th>Entered</Th>
+                    <Th>Submitted</Th>
+                    <Th>Plan</Th>
+                    <Th>Access</Th>
+                    <Th>Name</Th>
+                    <Th>Employer</Th>
+                    <Th>Payroll&nbsp;ID</Th>
+                    <Th>Date of service</Th>
+                    <Th>Premium</Th>
+                    <Th>Taxable</Th>
+                    <Th>Premium&nbsp;Status</Th>
+                    <Th>Status</Th>
+                    <Th>Device</Th>
+                    <Th>Receipt</Th>
+                    <ThStickyRight2>Search</ThStickyRight2>
+                    <ThStickyRight>Copy&nbsp;ID</ThStickyRight>
                   </Tr>
+                </thead>
+
+                <tbody>
+                  {filtered.map((r) => (
+                    <Tr key={r.id}>
+                      <Td>{r.entered}</Td>
+                      <Td>{r.submitted}</Td>
+                      <Td>{r.plan}</Td>
+                      <Td>
+                        <Tooltip title={r.access ? "Has access" : "No access"}>
+                          <IconButton
+                            size="small"
+                            onClick={() => toggleAccess(r.id)}
+                          >
+                            {r.access ? (
+                              <Box
+                                sx={{ width: "20px" }}
+                                component="img"
+                                src={accessIcon}
+                              />
+                            ) : (
+                              <Box
+                                sx={{ width: "20px" }}
+                                component="img"
+                                src={noAccessIcon}
+                              />
+                            )}
+                          </IconButton>
+                        </Tooltip>
+                      </Td>
+                      <Td>
+                        <NameCell>
+                          <span className="name">
+                            {r.firstName} {r.lastName}
+                          </span>
+                          <span className="email">{r.email}</span>
+                        </NameCell>
+                      </Td>
+                      <Td>
+                        <Truncate>{r.employer}</Truncate>
+                      </Td>
+                      <Td>{r.payrollId}</Td>
+                      <Td>{r.serviceDate}</Td>
+                      <Td>{r.premium}</Td>
+                      <Td>{r.taxable}</Td>
+                      <Td>{r.premiumStatus}</Td>
+                      <Td>
+                        {r.status === "Approved" ? "Approval" : "Pending"}
+                      </Td>
+                      <Td>{r.device}</Td>
+                      <Td>
+                        <Truncate>{r.receipt}</Truncate>
+                      </Td>
+
+                      {/* sticky: SEARCH */}
+                      <TdStickyRight2>
+                        <Tooltip title="Search this row">
+                          <Box
+                            onClick={() => searchThisRow(r)}
+                            component="img"
+                            src={searchIcon}
+                            sx={{ cursor: "pointer" }}
+                          />
+                        </Tooltip>
+                      </TdStickyRight2>
+
+                      {/* sticky: COPY ID */}
+                      <TdStickyRight>
+                        <Tooltip
+                          title={copied === r.id ? "Copied!" : "Copy ID"}
+                        >
+                          <Box
+                            component="img"
+                            src={copyIcon}
+                            onClick={() => copyId(r.id)}
+                            sx={{ cursor: "pointer" }}
+                          />
+                        </Tooltip>
+                      </TdStickyRight>
+                    </Tr>
+                  ))}
+                </tbody>
+              </Table>
+            </TableWrap>
+          </Box>
+          <MobileList sx={{ display: { xs: "flex", md: "none" } }}>
+            {filtered.map((r) => (
+              <MobileCard key={r.id}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    mb: 0.5,
+                  }}
+                >
+                  <Typography
+                    sx={{ color: "#6579A8", fontWeight: 600, fontSize: 12 }}
+                  >
+                    {r.id}
+                  </Typography>
+                  <Box sx={{ display: "flex", gap: 1.5 }}>
+                    <Tooltip title="Search this row">
+                      <Box
+                        component="img"
+                        src={searchIcon}
+                        sx={{ cursor: "pointer" }}
+                        onClick={() => searchThisRow(r)}
+                      />
+                    </Tooltip>
+                    <Tooltip title={copied === r.id ? "Copied!" : "Copy ID"}>
+                      <Box
+                        component="img"
+                        src={copyIcon}
+                        sx={{ cursor: "pointer" }}
+                        onClick={() => copyId(r.id)}
+                      />
+                    </Tooltip>
+                  </Box>
+                </Box>
+
+                {MOBILE_FIELDS.map((f) => (
+                  <Line key={f.label}>
+                    <Label>{f.label}</Label>
+                    <Value title={String(f.get(r))}>{f.get(r)}</Value>
+                  </Line>
                 ))}
-              </tbody>
-            </Table>
-          </TableWrap>
+
+                <Box
+                  sx={{
+                    mt: "10px",
+                    display: "flex",
+                    gap: "10px",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography
+                    sx={{ color: "#465578", fontSize: 12, fontWeight: "600" }}
+                  >
+                    Access
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={() => toggleAccess(r.id)}
+                    sx={{ p: 0 }}
+                  >
+                    <Box
+                      component="img"
+                      src={r.access ? accessIcon : noAccessIcon}
+                      sx={{ width: 20 }}
+                    />
+                  </IconButton>
+                </Box>
+              </MobileCard>
+            ))}
+          </MobileList>
         </Box>
       </Card>
     </Container>

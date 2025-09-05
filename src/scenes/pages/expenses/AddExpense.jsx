@@ -12,9 +12,14 @@ import {
   FormControl,
   FormLabel,
   Link as MuiLink,
+  InputAdornment,
+  colors,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Link as RouterLink, useNavigate, useLocation } from "react-router-dom";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 import arrowBack from "../../../assets/arrow-left.svg";
 import fileIcon from "../../../assets/file-icon.svg";
@@ -82,6 +87,19 @@ const TileBase = styled(Box)({
   fontWeight: 500,
   cursor: "pointer",
   overflow: "hidden",
+});
+
+const DateField = styled(DatePicker)({
+  background: "#fff",
+  borderRadius: "10px",
+  marginTop: "12px",
+  "& fieldset": {
+    border: "none !important",
+    outline: "none !important",
+  },
+  "& span": {
+    color: "#465578 !important",
+  },
 });
 
 const AddTile = styled(TileBase)({ "&:hover": { background: "#F1F3FF" } });
@@ -163,7 +181,7 @@ export default function AddExpense() {
   const location = useLocation();
 
   const fileInputRef = React.useRef(null);
-  const [files, setFiles] = React.useState([]); // File[]
+  const [files, setFiles] = React.useState([]);
   const [fileError, setFileError] = React.useState("");
 
   const mergeWithLimit = React.useCallback((prev, incoming) => {
@@ -289,6 +307,21 @@ export default function AddExpense() {
     return slots;
   };
 
+  const formatThousands = (input) => {
+    if (input == null) return "";
+    let v = String(input).replace(/[^\d.]/g, "");
+    const [intRaw, ...rest] = v.split(".");
+    const intOnly = intRaw.replace(/\D/g, "");
+    const intWithCommas = intOnly.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    const dec = rest.length ? rest.join("").replace(/\D/g, "") : "";
+    return dec ? `${intWithCommas}.${dec}` : intWithCommas;
+  };
+
+  const handleMoneyChange = (name) => (e) => {
+    const v = e.target.value || "";
+    setForm((f) => ({ ...f, [name]: formatThousands(v) }));
+  };
+
   return (
     <Box pb="40px">
       <Root>
@@ -299,213 +332,215 @@ export default function AddExpense() {
           Go Back
         </BackLink>
 
-        <Card component="form" onSubmit={handleSubmit}>
-          <Title variant="h1">Add Expense</Title>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <Card component="form" onSubmit={handleSubmit}>
+            <Title variant="h1">Add Expense</Title>
 
-          <SectionLabel>Add your receipt</SectionLabel>
-          <ReceiptsGrid>{renderSlots()}</ReceiptsGrid>
+            <SectionLabel>Add your receipt</SectionLabel>
+            <ReceiptsGrid>{renderSlots()}</ReceiptsGrid>
 
-          {fileError && (
-            <Typography sx={{ color: "#d32f2f", mb: 1 }}>
-              {fileError}
-            </Typography>
-          )}
-
-          <HiddenInput
-            ref={fileInputRef}
-            type="file"
-            accept="image/*,application/pdf"
-            multiple
-            onChange={handleFiles}
-          />
-
-          {/* Radio pitanje */}
-          <SectionLabel>Is this expense an insurance premium?</SectionLabel>
-          <RadioGroup
-            row
-            value={form.isPremium}
-            onChange={handleChange("isPremium")}
-            sx={{ gap: 3, marginTop: "-10px" }}
-          >
-            <FormControlLabel value="yes" control={<Radio />} label="Yes" />
-            <FormControlLabel value="no" control={<Radio />} label="No" />
-          </RadioGroup>
-
-          {/* === Regularni fieldovi (kad je NO) === */}
-          {form.isPremium === "no" && (
-            <>
-              <FieldWrap fullWidth>
-                <StaticLabel htmlFor="amount">Amount</StaticLabel>
-                <Field
-                  id="amount"
-                  placeholder="$0.00"
-                  type="text"
-                  value={form.amount}
-                  onChange={handleChange("amount")}
-                  inputProps={{ inputMode: "decimal" }}
-                  required
-                  fullWidth
-                />
-              </FieldWrap>
-
-              <FieldWrap fullWidth>
-                <StaticLabel htmlFor="date">Date of Service</StaticLabel>
-                <Field
-                  id="date"
-                  placeholder="06.03.2025"
-                  type="text" // ⬅️ tekstualni unos
-                  value={form.date}
-                  onChange={handleChange("date")}
-                  required
-                  fullWidth
-                />
-              </FieldWrap>
-
-              <FieldWrap fullWidth>
-                <StaticLabel htmlFor="provider">Provider</StaticLabel>
-                <Field
-                  id="provider"
-                  select
-                  value={form.provider}
-                  onChange={handleChange("provider")}
-                  fullWidth
-                >
-                  {providers.map((p) => (
-                    <MenuItem key={p} value={p}>
-                      {p}
-                    </MenuItem>
-                  ))}
-                </Field>
-              </FieldWrap>
-
-              <FieldWrap fullWidth>
-                <StaticLabel htmlFor="forWhom">
-                  Who is this expense for?
-                </StaticLabel>
-                <Field
-                  id="forWhom"
-                  select
-                  value={form.forWhom}
-                  onChange={handleChange("forWhom")}
-                  fullWidth
-                >
-                  {people.map((p) => (
-                    <MenuItem key={p} value={p}>
-                      {p}
-                    </MenuItem>
-                  ))}
-                </Field>
-              </FieldWrap>
-            </>
-          )}
-
-          {/* === Premium fieldovi (kad je YES) === */}
-          {form.isPremium === "yes" && (
-            <>
-              <FieldWrap fullWidth>
-                <StaticLabel htmlFor="premiumAmount">
-                  Premium Amount
-                </StaticLabel>
-                <Field
-                  id="premiumAmount"
-                  placeholder="$0.00"
-                  type="text"
-                  value={form.premiumAmount}
-                  onChange={handleChange("premiumAmount")}
-                  inputProps={{ inputMode: "decimal" }}
-                  required
-                  fullWidth
-                />
-              </FieldWrap>
-
-              <InfoText>
-                For premiums, enter amount BEFORE any premium tax credit
-                adjustment. QSEHRA allocations offset dollar-for-dollar any
-                premium tax credit you receive.
-              </InfoText>
-
-              <FieldWrap fullWidth>
-                <StaticLabel htmlFor="premiumMonth">
-                  Month of Insurance Coverage
-                </StaticLabel>
-                <Field
-                  id="premiumMonth"
-                  placeholder="06.03.2025"
-                  type="text" // ⬅️ ostaje tekst
-                  value={form.premiumMonth}
-                  onChange={handleChange("premiumMonth")}
-                  required
-                  fullWidth
-                />
-              </FieldWrap>
-
-              <FieldWrap fullWidth>
-                <StaticLabel htmlFor="insuranceProvider">
-                  Insurance Provider
-                </StaticLabel>
-                <Field
-                  id="insuranceProvider"
-                  select
-                  value={form.insuranceProvider}
-                  onChange={handleChange("insuranceProvider")}
-                  fullWidth
-                >
-                  {providers.map((p) => (
-                    <MenuItem key={p} value={p}>
-                      {p}
-                    </MenuItem>
-                  ))}
-                </Field>
-              </FieldWrap>
-
-              <FieldWrap fullWidth>
-                <StaticLabel htmlFor="policyHolder">Policy Holder</StaticLabel>
-                <Field
-                  id="policyHolder"
-                  select
-                  value={form.policyHolder}
-                  onChange={handleChange("policyHolder")}
-                  fullWidth
-                >
-                  {people.map((p) => (
-                    <MenuItem key={p} value={p}>
-                      {p}
-                    </MenuItem>
-                  ))}
-                </Field>
-              </FieldWrap>
-
-              <Typography
-                variant="body1"
-                sx={{ fontWeight: 500, margin: "20px 0 15px" }}
-              >
-                Instead of submitting your premiums each month, let us handle it
-                for you. Add a phone number to your profile to take advantage of
-                this option.
+            {fileError && (
+              <Typography sx={{ color: "#d32f2f", mb: 1 }}>
+                {fileError}
               </Typography>
-            </>
-          )}
+            )}
 
-          <NoteList>
-            By submitting your expense, you confirm and agree to the following:
-            <div>
-              <Box component="span" aria-hidden sx={{ color: "#6C63FF" }}>
-                •
-              </Box>
-              <span>You have paid for this expense</span>
-            </div>
-            <div>
-              <Box component="span" aria-hidden sx={{ color: "#6C63FF" }}>
-                •
-              </Box>
-              <span>This expense is eligible for reimbursement</span>
-            </div>
-          </NoteList>
+            <HiddenInput
+              ref={fileInputRef}
+              type="file"
+              accept="image/*,application/pdf"
+              multiple
+              onChange={handleFiles}
+            />
 
-          <SubmitBtn type="submit" fullWidth>
-            Submit for Approval
-          </SubmitBtn>
-        </Card>
+            <SectionLabel>Is this expense an insurance premium?</SectionLabel>
+            <RadioGroup
+              row
+              value={form.isPremium}
+              onChange={handleChange("isPremium")}
+              sx={{ gap: 3, marginTop: "-10px" }}
+            >
+              <FormControlLabel value="yes" control={<Radio />} label="Yes" />
+              <FormControlLabel value="no" control={<Radio />} label="No" />
+            </RadioGroup>
+
+            {form.isPremium === "no" && (
+              <>
+                <FieldWrap fullWidth>
+                  <StaticLabel htmlFor="amount">Amount</StaticLabel>
+                  <Field
+                    id="amount"
+                    placeholder="0.00"
+                    type="text"
+                    value={form.amount}
+                    onChange={handleMoneyChange("amount")}
+                    required
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">$</InputAdornment>
+                      ),
+                    }}
+                    inputProps={{ inputMode: "decimal" }}
+                  />
+                </FieldWrap>
+
+                <FieldWrap fullWidth>
+                  <StaticLabel htmlFor="date">Date of Service</StaticLabel>
+                  <DateField
+                    value={form.date || null}
+                    onChange={(v) => setForm((f) => ({ ...f, date: v }))}
+                  />
+                </FieldWrap>
+
+                <FieldWrap fullWidth>
+                  <StaticLabel htmlFor="provider">Provider</StaticLabel>
+                  <Field
+                    id="provider"
+                    select
+                    value={form.provider}
+                    onChange={handleChange("provider")}
+                    fullWidth
+                  >
+                    {providers.map((p) => (
+                      <MenuItem key={p} value={p}>
+                        {p}
+                      </MenuItem>
+                    ))}
+                  </Field>
+                </FieldWrap>
+
+                <FieldWrap fullWidth>
+                  <StaticLabel htmlFor="forWhom">
+                    Who is this expense for?
+                  </StaticLabel>
+                  <Field
+                    id="forWhom"
+                    select
+                    value={form.forWhom}
+                    onChange={handleChange("forWhom")}
+                    fullWidth
+                  >
+                    {people.map((p) => (
+                      <MenuItem key={p} value={p}>
+                        {p}
+                      </MenuItem>
+                    ))}
+                  </Field>
+                </FieldWrap>
+              </>
+            )}
+
+            {form.isPremium === "yes" && (
+              <>
+                <FieldWrap fullWidth>
+                  <StaticLabel htmlFor="premiumAmount">
+                    Premium Amount
+                  </StaticLabel>
+                  <Field
+                    id="premiumAmount21"
+                    placeholder="0.00"
+                    type="text"
+                    value={form.premiumAmount}
+                    onChange={handleMoneyChange("premiumAmount")}
+                    required
+                    fullWidth
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">$</InputAdornment>
+                      ),
+                    }}
+                    inputProps={{ inputMode: "decimal" }} // ← ovdje ide inputMode
+                  />
+                </FieldWrap>
+
+                <InfoText>
+                  For premiums, enter amount BEFORE any premium tax credit
+                  adjustment. QSEHRA allocations offset dollar-for-dollar any
+                  premium tax credit you receive.
+                </InfoText>
+
+                <FieldWrap fullWidth>
+                  <StaticLabel htmlFor="premiumMonth">
+                    Month of Insurance Coverage
+                  </StaticLabel>
+                  <DateField
+                    value={form.date || null}
+                    onChange={(v) => setForm((f) => ({ ...f, date: v }))}
+                  />
+                </FieldWrap>
+
+                <FieldWrap fullWidth>
+                  <StaticLabel htmlFor="insuranceProvider">
+                    Insurance Provider
+                  </StaticLabel>
+                  <Field
+                    id="insuranceProvider"
+                    select
+                    value={form.insuranceProvider}
+                    onChange={handleChange("insuranceProvider")}
+                    fullWidth
+                  >
+                    {providers.map((p) => (
+                      <MenuItem key={p} value={p}>
+                        {p}
+                      </MenuItem>
+                    ))}
+                  </Field>
+                </FieldWrap>
+
+                <FieldWrap fullWidth>
+                  <StaticLabel htmlFor="policyHolder">
+                    Policy Holder
+                  </StaticLabel>
+                  <Field
+                    id="policyHolder"
+                    select
+                    value={form.policyHolder}
+                    onChange={handleChange("policyHolder")}
+                    fullWidth
+                  >
+                    {people.map((p) => (
+                      <MenuItem key={p} value={p}>
+                        {p}
+                      </MenuItem>
+                    ))}
+                  </Field>
+                </FieldWrap>
+
+                <Typography
+                  variant="body1"
+                  sx={{ fontWeight: 500, margin: "20px 0 15px" }}
+                >
+                  Instead of submitting your premiums each month, let us handle
+                  it for you. Add a phone number to your profile to take
+                  advantage of this option.
+                </Typography>
+              </>
+            )}
+
+            <NoteList>
+              By submitting your expense, you confirm and agree to the
+              following:
+              <div>
+                <Box component="span" aria-hidden sx={{ color: "#6C63FF" }}>
+                  •
+                </Box>
+                <span>You have paid for this expense</span>
+              </div>
+              <div>
+                <Box component="span" aria-hidden sx={{ color: "#6C63FF" }}>
+                  •
+                </Box>
+                <span>This expense is eligible for reimbursement</span>
+              </div>
+            </NoteList>
+
+            <SubmitBtn type="submit" fullWidth>
+              Submit for Approval
+            </SubmitBtn>
+          </Card>
+        </LocalizationProvider>
       </Root>
     </Box>
   );

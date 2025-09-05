@@ -8,6 +8,9 @@ import PlanDetails from "./scenes/pages/plan-details/PlanDetails";
 import AddExpense from "./scenes/pages/expenses/AddExpense";
 import Employees from "./scenes/pages/add-employees/Employees";
 import MedicalExpenses from "./scenes/pages/medical-expenses/MedicalExpenses";
+import AccountActivation from "./scenes/pages/account-activation/AccountActivation";
+import Plans from "./scenes/pages/plans/Plans";
+import PlanSingle from "./scenes/pages/plan-single/PlanSingle";
 
 import RootLayout from "./scenes/RootLayout";
 
@@ -20,8 +23,11 @@ const router = createBrowserRouter([
       { path: "/add-expense", element: <AddExpense /> },
       { path: "/employees", element: <Employees /> },
       { path: "/medical-expenses", element: <MedicalExpenses /> },
+      { path: "/plans", element: <Plans /> },
+      { path: "/plans/:id", element: <PlanSingle /> },
     ],
   },
+  { path: "/account-activation", element: <AccountActivation /> },
 ]);
 
 function App() {
