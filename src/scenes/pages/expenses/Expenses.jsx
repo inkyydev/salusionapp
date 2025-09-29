@@ -3,10 +3,14 @@ import Container from "@mui/material/Container";
 import Grid from "@mui/material/Grid";
 import { Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { Link as RouterLink } from "react-router-dom";
+import { Link as MuiLink } from "@mui/material";
 
 import HraSnapshot from "./HraSnapshot";
 import ExpenseStatus from "./ExpenseStatus";
 import ActionRequiredBanner from "../../../components/ActionRequiredBanner";
+
+import arrowImg from "../../../assets/arrow-top-right.svg";
 
 import fileIcon from "../../../assets/file-icon.svg";
 
@@ -88,16 +92,41 @@ export default function Expenses() {
                   backgroundColor: "#F8F9FF",
                   maxWidth: "625px",
                   marginLeft: "auto",
-                  padding: { xs: "21px 20px", sm: "25px 32px 31px" },
+                  padding: { xs: "21px 20px", sm: "25px 20px 31px" },
                   borderRadius: "20px",
                 }}
               >
-                <Typography
-                  variant="h2"
-                  sx={{ fontSize: { xs: "32px", sm: "36px" } }}
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    flexDirection: { xs: "column", sm: "column", md: "row" },
+                    alignItems: { xs: "flex-start", sm: "center" },
+                    gap: { xs: "10px", sm: "0" },
+                  }}
                 >
-                  HRA Snapshot
-                </Typography>
+                  <Typography
+                    variant="h2"
+                    sx={{ fontSize: { xs: "32px", sm: "36px" } }}
+                  >
+                    HRA Snapshot
+                  </Typography>
+                  <MuiLink
+                    component={RouterLink}
+                    to="/plan-details"
+                    sx={{
+                      textDecoration: "none",
+                      fontSize: { xs: "14px", sm: "18px" },
+                      display: "flex",
+                      gap: "10px",
+                      fontWeight: "500",
+                    }}
+                  >
+                    View Plan Details
+                    <img src={arrowImg} />
+                  </MuiLink>
+                </Box>
                 <HraSnapshot />
               </Box>
             </Grid>
